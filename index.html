@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>33 школа — Учёт учащихся</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <!-- ЛОКАЛЬНЫЙ ЛОГОТИП -->
+            <img src="logo.jpeg" alt="Логотип 33 школы">
+
+            <div class="logo-text">
+                <strong>33 школа</strong>
+                <span>Учёт учащихся</span>
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <button class="nav-item active" data-page="dashboard">
+                <span>🏠</span>
+                <b>Главная</b>
+            </button>
+
+            <button class="nav-item" data-page="students">
+                <span>👨‍🎓</span>
+                <b>Ученики</b>
+            </button>
+
+            <button class="nav-item" data-page="classes">
+                <span>🏫</span>
+                <b>Классы</b>
+            </button>
+
+            <button class="nav-item" data-page="teachers">
+                <span>👩‍🏫</span>
+                <b>Преподаватели</b>
+            </button>
+
+            <button class="nav-item" data-page="search">
+                <span>🔎</span>
+                <b>Поиск по ИИН</b>
+            </button>
+
+            <button class="nav-item" data-page="backup">
+                <span>💾</span>
+                <b>Резервная копия</b>
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main">
+
+
+        <!-- ================= TOPBAR ================= -->
+
+        <header class="topbar">
+
+            <div class="topbar-brand">
+                <div>
+
+                    <h1 id="pageTitle">
+                        Главная
+                    </h1>
+
+                    <p>
+                        КГУ «Общеобразовательная школа №33»
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="topbar-date"
+                id="currentDate"
+            ></div>
+
+        </header>
+
+
+        <!-- ================= DASHBOARD ================= -->
+
+        <section
+            class="page active"
+            id="page-dashboard"
+        >
+
+            <div class="stats">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        👨‍🎓
+                    </div>
+
+                    <div>
+                        <span>Всего учеников</span>
+                        <strong id="statStudents">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        🏫
+                    </div>
+
+                    <div>
+                        <span>Классов</span>
+                        <strong id="statClasses">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        👩‍🏫
+                    </div>
+
+                    <div>
+                        <span>Учителей</span>
+                        <strong id="statTeachers">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <span>Активных учеников</span>
+                        <strong id="statActive">0</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>
+                            Распределение по классам
+                        </h2>
+                    </div>
+
+                    <div id="classDistribution"></div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>
+                            Последние добавленные
+                        </h2>
+                    </div>
+
+                    <div id="recentStudents"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= STUDENTS ================= -->
+
+        <section
+            class="page"
+            id="page-students"
+        >
+
+            <div class="page-actions">
+
+                <div class="filters">
+
+                    <select id="studentClassFilter">
+                        <option value="">
+                            Все классы
+                        </option>
+                    </select>
+
+
+                    <input
+                        type="text"
+                        id="studentSearch"
+                        placeholder="Поиск по ФИО или ИИН..."
+                    >
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="exportStudentsExcel()"
+                    >
+                        📥 Excel
+                    </button>
+
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openStudentModal()"
+                    >
+                        + Добавить ученика
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>№</th>
+                            <th>ФИО</th>
+                            <th>ИИН</th>
+                            <th>Дата рождения</th>
+                            <th>Класс</th>
+                            <th>Классный руководитель</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="studentsTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CLASSES ================= -->
+
+        <section
+            class="page"
+            id="page-classes"
+        >
+
+            <div class="page-actions">
+
+                <div></div>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openClassModal()"
+                >
+                    + Добавить класс
+                </button>
+
+            </div>
+
+
+            <div
+                class="classes-grid"
+                id="classesGrid"
+            ></div>
+
+        </section>
+
+
+        <!-- ================= TEACHERS ================= -->
+
+        <section
+            class="page"
+            id="page-teachers"
+        >
+
+            <div class="page-actions">
+
+                <div></div>
+
+                <button
+                    class="btn btn-primary"
+                    onclick="openTeacherModal()"
+                >
+                    + Добавить преподавателя
+                </button>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>№</th>
+                            <th>ФИО</th>
+                            <th>Предмет</th>
+                            <th>Класс</th>
+                            <th>Действия</th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="teachersTable"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= SEARCH ================= -->
+
+        <section
+            class="page"
+            id="page-search"
+        >
+
+            <div class="search-box">
+
+                <div class="card">
+
+                    <h2>
+                        Поиск ученика по ИИН
+                    </h2>
+
+                    <p class="muted">
+                        Введите 12-значный ИИН учащегося.
+                    </p>
+
+
+                    <div class="search-form">
+
+                        <input
+                            type="text"
+                            id="iinSearch"
+                            maxlength="12"
+                            inputmode="numeric"
+                            placeholder="Введите ИИН"
+                        >
+
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="searchByIIN()"
+                        >
+                            🔎 Найти
+                        </button>
+
+                    </div>
+
+
+                    <div id="searchResult"></div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= BACKUP ================= -->
+
+        <section
+            class="page"
+            id="page-backup"
+        >
+
+            <div class="backup-grid">
+
+
+                <!-- JSON -->
+
+                <div class="card backup-card">
+
+                    <div class="backup-icon">
+                        💾
+                    </div>
+
+                    <h2>
+                        JSON резервная копия
+                    </h2>
+
+                    <p>
+                        Полная копия базы данных:
+                        ученики, классы, преподаватели
+                        и связи между ними.
+                    </p>
+
+
+                    <div class="backup-actions">
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="exportData()"
+                        >
+                            ⬇ Скачать JSON
+                        </button>
+
+
+                        <label class="btn btn-secondary">
+
+                            ⬆ Загрузить JSON
+
+                            <input
+                                type="file"
+                                id="importFile"
+                                accept=".json"
+                                hidden
+                                onchange="importData(event)"
+                            >
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EXCEL -->
+
+                <div class="card backup-card">
+
+                    <div class="backup-icon">
+                        📊
+                    </div>
+
+                    <h2>
+                        Excel
+                    </h2>
+
+                    <p>
+                        Выгрузка и загрузка учащихся
+                        в формате Excel.
+                    </p>
+
+
+                    <div class="excel-export">
+
+                        <label>
+                            Класс для выгрузки
+                        </label>
+
+
+                        <select id="excelClassSelect">
+
+                            <option value="">
+                                Все классы
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="exportExcelFromBackup()"
+                        >
+                            📥 Скачать Excel
+                        </button>
+
+                    </div>
+
+
+                    <div class="excel-divider"></div>
+
+
+                    <div class="excel-import">
+
+                        <label class="btn btn-secondary">
+
+                            📤 Загрузить Excel
+
+                            <input
+                                type="file"
+                                id="excelImportFile"
+                                accept=".xlsx,.xls"
+                                hidden
+                                onchange="importExcel(event)"
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="excel-help">
+
+                        <strong>
+                            Формат Excel:
+                        </strong>
+
+                        <p>
+                            ФИО, ИИН, Дата рождения,
+                            Класс, Статус, Примечание
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CLEAR -->
+
+                <div class="card backup-card danger-card">
+
+                    <div class="backup-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Очистка базы
+                    </h2>
+
+                    <p>
+                        Удалить всех учеников,
+                        классы и преподавателей
+                        из локальной базы.
+                    </p>
+
+
+                    <button
+                        class="btn btn-danger"
+                        onclick="clearDatabase()"
+                    >
+                        🗑 Очистить базу
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ================= MODAL ================= -->
+
+<div
+    class="modal"
+    id="modal"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2 id="modalTitle">
+                Добавить
+            </h2>
+
+
+            <button
+                class="modal-close"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="modalBody"></div>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>
